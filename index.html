@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Anime Tap</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial}
+body{
+  background:radial-gradient(circle at top,#1a1a40,#000);
+  color:#fff;
+  height:100vh;
+  overflow:hidden;
+}
+#app{
+  display:flex;
+  flex-direction:column;
+  height:100%;
+}
+header{
+  padding:10px;
+  display:flex;
+  justify-content:space-between;
+  background:rgba(0,0,0,.4);
+}
+.stat{font-size:14px}
+#tap-area{
+  flex:1;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+#tap{
+  width:260px;
+  transition:.1s;
+  animation:float 3s ease-in-out infinite;
+}
+#tap:active{transform:scale(.9)}
+@keyframes float{
+  0%{transform:translateY(0)}
+  50%{transform:translateY(-15px)}
+  100%{transform:translateY(0)}
+}
+.menu{
+  display:flex;
+  justify-content:space-around;
+  background:#0a0a2a;
+  padding:10px 0;
+}
+.menu button{
+  background:#222;
+  border:none;
+  color:#fff;
+  padding:8px 12px;
+  border-radius:10px;
+}
+.panel{
+  position:absolute;
+  inset:0;
+  background:rgba(0,0,0,.9);
+  display:none;
+  padding:20px;
+}
+.panel h2{margin-bottom:10px}
+.card{
+  background:#1c1c3a;
+  padding:12px;
+  border-radius:12px;
+  margin-bottom:10px;
+  box-shadow:0 0 15px #000;
+}
+.buy{background:#ff2fa1}
+.close{margin-top:10px;background:#444}
+</style>
+</head>
+
+<body>
+<div id="app">
+
+<header>
+  <div class="stat">Очки: <span id="points">0</span></div>
+  <div class="stat">Множитель: x<span id="mult">1</span></div>
+</header>
+
+<div id="tap-area">
+  <img id="tap" src="girl.png">
+</div>
+
+<div class="menu">
+  <button onclick="openPanel('shop')">🛒 Магазин</button>
+  <button onclick="openPanel('profile')">👤 Профиль</button>
+  <button onclick="openPanel('leader')">🏆 Топ</button>
+  <button onclick="openPanel('settings')">⚙️</button>
+</div>
+
+<!-- SHOP -->
+<div id="shop" class="panel">
+  <h2>🛒 Магазин</h2>
+
+  <div class="card">
+    x2 на 10 минут<br>
+    Цена: 500 очков
+    <button class="buy" onclick="buyBoost(2,500)">Купить</button>
+  </div>
+
+  <div class="card">
+    x5 на 10 минут<br>
+    Цена: 3000 очков
+    <button class="buy" onclick="buyBoost(5,3000)">Купить</button>
+  </div>
+
+  <button class="close" onclick="closePanel()">Закрыть</button>
+</div>
+
+<!-- PROFILE -->
+<div id="profile" class="panel">
+  <h2>👤 Профиль</h2>
+  <div class="card">Всего очков: <span id="total">0</span></div>
+  <button class="close" onclick="closePanel()">Закрыть</button>
+</div>
+
+<!-- LEADER -->
+<div id="leader" class="panel">
+  <h2>🏆 Лидерборд</h2>
+  <div class="card">Скоро серверный топ</div>
+  <button class="close" onclick="closePanel()">Закрыть</button>
+</div>
+
+<!-- SETTINGS -->
+<div id="settings" class="panel">
+  <h2>⚙️ Настройки</h2>
+  <div class="card">
+    <button onclick="resetGame()">Сбросить прогресс</button>
+  </div>
+  <button class="close" onclick="closePanel()">Закрыть</button>
+</div>
+
+</div>
+
+<script>
+let points=Number(localStorage.points||0)
+let total=Number(localStorage.total||0)
+let mult=Number(localStorage.mult||1)
+let boostEnd=Number(localStorage.boostEnd||0)
+
+const pEl=document.getElementById('points')
+const mEl=document.getElementById('mult')
+const tEl=document.getElementById('total')
+
+function update(){
+  if(Date.now()>boostEnd){
+    mult=1
+  }
+  pEl.textContent=points
+  mEl.textContent=mult
+  tEl.textContent=total
+  localStorage.points=points
+  localStorage.total=total
+  localStorage.mult=mult
+  localStorage.boostEnd=boostEnd
+}
+update()
+
+document.getElementById('tap').onclick=()=>{
+  points+=mult
+  total+=mult
+  update()
+}
+
+function buyBoost(x,price){
+  if(points<price)return alert('Не хватает очков')
+  points-=price
+  mult=x
+  boostEnd=Date.now()+10*60*1000
+  update()
+}
+
+function openPanel(id){
+  document.getElementById(id).style.display='block'
+}
+function closePanel(){
+  document.querySelectorAll('.panel').forEach(p=>p.style.display='none')
+}
+function resetGame(){
+  if(confirm('Точно?')){
+    localStorage.clear()
+    location.reload()
+  }
+}
+</script>
+</body>
+  </html>
